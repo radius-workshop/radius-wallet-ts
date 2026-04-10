@@ -279,6 +279,20 @@ describe("RadiusWallet", () => {
       );
       expect(hash).toBe(MOCK_TX_HASH);
     });
+
+    it("rejects zero amounts", async () => {
+      const w = createWallet();
+      await expect(w.sendRusd(RECIPIENT, "0")).rejects.toThrow(
+        "RUSD amount must be greater than zero"
+      );
+    });
+
+    it("rejects amounts with precision above 18 decimals", async () => {
+      const w = createWallet();
+      await expect(w.sendRusd(RECIPIENT, "0.0000000000000000009")).rejects.toThrow(
+        "RUSD amount has more than 18 decimal places"
+      );
+    });
   });
 
   // =========================================================================
@@ -300,6 +314,20 @@ describe("RadiusWallet", () => {
         })
       );
       expect(hash).toBe(MOCK_TX_HASH);
+    });
+
+    it("rejects zero amounts", async () => {
+      const w = createWallet();
+      await expect(w.sendSbc(RECIPIENT, "0")).rejects.toThrow(
+        "SBC amount must be greater than zero"
+      );
+    });
+
+    it("rejects amounts with precision above 6 decimals", async () => {
+      const w = createWallet();
+      await expect(w.sendSbc(RECIPIENT, "0.0000009")).rejects.toThrow(
+        "SBC amount has more than 6 decimal places"
+      );
     });
   });
 
@@ -438,6 +466,13 @@ describe("RadiusWallet", () => {
 
       const w = createWallet();
       await expect(w.requestFaucet()).rejects.toThrow("Faucet error:");
+    });
+
+    it("throws on mainnet because faucet is testnet-only", async () => {
+      globalThis.fetch = vi.fn();
+      const w = createWallet({ chain: "mainnet" });
+      await expect(w.requestFaucet()).rejects.toThrow("Faucet is testnet-only");
+      expect(globalThis.fetch).not.toHaveBeenCalled();
     });
   });
 

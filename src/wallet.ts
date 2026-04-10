@@ -62,6 +62,19 @@ async function parseJsonResponse(res: Response): Promise<unknown> {
   }
 }
 
+function validateAmountInput(amount: string, decimals: number, label: string): void {
+  if (!/^\d+(\.\d+)?$/.test(amount)) {
+    throw new Error(`${label} amount must be a decimal string (e.g. "1.5").`);
+  }
+  const [, fraction = ""] = amount.split(".");
+  if (fraction.length > decimals) {
+    throw new Error(`${label} amount has more than ${decimals} decimal places.`);
+  }
+  if (!/[1-9]/.test(amount.replace(".", ""))) {
+    throw new Error(`${label} amount must be greater than zero.`);
+  }
+}
+
 export class RadiusWallet {
   public readonly address: Address;
   public readonly chain: Chain;
@@ -165,6 +178,7 @@ export class RadiusWallet {
   // ---------------------------------------------------------------------------
 
   async sendRusd(to: Address, amount: string): Promise<Hash> {
+    validateAmountInput(amount, 18, "RUSD");
     const value = parseEther(amount);
     return this.walletClient.sendTransaction({
       account: this.account,
@@ -175,6 +189,7 @@ export class RadiusWallet {
   }
 
   async sendSbc(to: Address, amount: string): Promise<Hash> {
+    validateAmountInput(amount, SBC_DECIMALS, "SBC");
     const value = parseUnits(amount, SBC_DECIMALS);
     return this.walletClient.writeContract({
       account: this.account,
@@ -208,6 +223,9 @@ export class RadiusWallet {
   // ---------------------------------------------------------------------------
 
   async requestFaucet(token: string = "SBC"): Promise<FaucetResult> {
+    if (this.chain.id === radiusMainnet.id) {
+      throw new Error("Faucet is testnet-only. Initialize with testnet to request faucet funds.");
+    }
     // Try unsigned drip first
     const res = await fetch(`${FAUCET_BASE}/drip`, {
       method: "POST",

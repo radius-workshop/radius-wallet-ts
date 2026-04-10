@@ -81,6 +81,8 @@ wallet.explorerUrl(hash);                       // Link to block explorer
 const result = await wallet.requestFaucet();  // Requests SBC from testnet faucet
 ```
 
+`requestFaucet()` is testnet-only and throws when the wallet is configured for mainnet.
+
 ### Deploy Contracts
 
 ```typescript
