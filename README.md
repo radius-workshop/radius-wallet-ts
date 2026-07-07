@@ -163,3 +163,7 @@ Run with: `npx tsx examples/check-balance.ts`
 ## Production Notes
 
 This library uses a local private key for signing. For production, use a managed signing service like [Privy](https://privy.io/). See the [Nanda Wallet Concierge](https://github.com/radius-workshop/nanda-wallet-concierge) for an example.
+
+---
+
+> ⚠️ **Demo code — not production-ready.** Provided as-is, without warranty, and may contain known, unpatched vulnerabilities (including in dependencies). If you reuse it, run your own security and supply-chain scans and patch before deploying.
